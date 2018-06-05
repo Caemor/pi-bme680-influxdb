@@ -1,0 +1,22 @@
+[package]
+name = "pi-bme680-influxdb"
+version = "0.1.0"
+authors = ["Chris <Caemor@users.noreply.github.com>"]
+
+[dependencies]
+
+linux-embedded-hal = "0.2.0"
+
+embedded-hal = { version = "0.2.1", features = ["unproven"] }
+bme680 = { git = "https://github.com/marcelbuesing/bme680"}
+env_logger = "0.5.10"
+log = "0.4.1"
+
+
+kankyo = "0.2.0"
+
+[dependencies.influent]
+git = "https://github.com/Caemor/influent.rs"
+branch = "reqwest"
+default-features = false
+features = ["https"]
