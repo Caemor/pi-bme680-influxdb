@@ -89,7 +89,7 @@ fn main()
     let sensor_settings = dev.get_sensor_settings(settings.1);
     info!("Sensor settings: {:?}", sensor_settings);
 
-    
+    let mut warm_up = 0;
 
     loop {
 
@@ -105,13 +105,20 @@ fn main()
         info!("Humidity {}%", data.humidity_percent());
         info!("Gas Resistence {}Ω", data.gas_resistance_ohm());
 
-        // Send the Data to the Influx Database
-        if state == FieldDataCondition::NewData {
-           send_value(&client, "temperature" ,Value::Float(data.temperature_celsius() as f64), id);
-           send_value(&client, "pressure" ,Value::Float(data.pressure_hpa() as f64), id);
-           send_value(&client, "humidity" ,Value::Float(data.humidity_percent() as f64), id);
-           send_value(&client, "gasresistence" , Value::Float(data.gas_resistance_ohm() as f64), id);
+        // sensor needs a bit time to warm up until it transmits the correct data
+        // so we don't transmit the first minute of sensor data
+        if warm_up > 12 {
+            // Send the Data to the Influx Database
+            if state == FieldDataCondition::NewData {
+                send_value(&client, "temperature" ,Value::Float(data.temperature_celsius() as f64), id);
+                send_value(&client, "pressure" ,Value::Float(data.pressure_hpa() as f64), id);
+                send_value(&client, "humidity" ,Value::Float(data.humidity_percent() as f64), id);
+                send_value(&client, "gasresistence" , Value::Float(data.gas_resistance_ohm() as f64), id);
+            }
+        } else {
+            warm_up += 1;
         }
+        
 
         //Sleep for 5 seconds
         thread::sleep(Duration::from_millis(5000));
